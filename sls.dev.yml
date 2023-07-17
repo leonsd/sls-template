@@ -1,0 +1,86 @@
+provider:
+  profile: deploy-dev
+  iam:
+    role: arn:aws:iam::304649006169:role/custom_lambda
+  vpc:
+    securityGroupIds:
+      - sg-0bd7a4d00a5f2c2c9
+    subnetIds:
+      - subnet-0e5f5a6f08a23ba3d
+      - subnet-088eabdf6486d55ba
+
+functions:
+  authentication:
+    handler: build/index.authentication
+    events:
+      - httpApi:
+          path: /auth
+          method: post
+  incrementVisits:
+    handler: build/index.incrementVisits
+    events:
+      - httpApi:
+          path: /visits/{namespace}
+          method: put
+  getVisits:
+    handler: build/index.getVisits
+    events:
+      - httpApi:
+          path: /visits/{namespace}
+          method: get
+  createUser:
+    handler: build/index.createUser
+    events:
+      - httpApi:
+          path: /users
+          method: post
+  showUser:
+    handler: build/index.showUser
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: get
+  confirmUser:
+    handler: build/index.confirmUser
+    events:
+      - httpApi:
+          path: /users/confirm/{email}
+          method: patch
+  sendConfirmationEmailWorker:
+    handler: build/index.sendConfirmationEmailWorker
+    description: Send confirmation email register
+    timeout: 60
+    events:
+      - sqs:
+          arn: { Fn::GetAtt: [SendConfirmationEmailSQS, Arn] }
+          batchSize: 1
+
+resources:
+  Resources:
+    RDSMySQL:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        AllocatedStorage: 20
+        DBInstanceClass: db.t3.micro
+        Engine: MySQL
+        MasterUsername: ${env:DB_USERNAME}
+        MasterUserPassword: ${env:DB_PASSWORD}
+        PubliclyAccessible: true
+        VPCSecurityGroups:
+          - sg-0bd7a4d00a5f2c2c9
+        DBSubnetGroupName: db-subnet
+    ElasticCacheCluster:
+      Type: AWS::ElastiCache::CacheCluster
+      Properties:
+        AutoMinorVersionUpgrade: true
+        Engine: redis
+        CacheNodeType: cache.t3.micro
+        NumCacheNodes: 1
+        VpcSecurityGroupIds:
+          - sg-0bd7a4d00a5f2c2c9
+        CacheSubnetGroupName: redis-subnet
+    SendConfirmationEmailSQS:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "development_send_confirmation_email"
+        VisibilityTimeout: 300

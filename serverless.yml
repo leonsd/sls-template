@@ -1,0 +1,36 @@
+service: sls-template
+frameworkVersion: "3"
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 256
+  timeout: 15
+  profile: ${file(sls.${opt:stage}.yml):provider.profile}
+  iam:
+    role: ${file(sls.${opt:stage}.yml):provider.iam.role}
+  environment:
+    NODE_ENV: ${opt:stage}
+  vpc: ${file(sls.${opt:stage}.yml):provider.vpc}
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+package:
+  patterns:
+    - "!node_modules/@types/**"
+    - "!__tests__/**"
+    - "!src/**"
+    - "!.husky/**"
+    - "!coverage/**"
+    - "!.editorconfig"
+    - "!commitlint.config.js"
+    - "!jest.config.js"
+    - "!README.md"
+    - "!tsconfig.json"
+
+functions: ${file(sls.${opt:stage}.yml):functions}
+
+resources: ${file(sls.${opt:stage}.yml):resources}

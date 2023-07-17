@@ -1,0 +1,58 @@
+provider:
+  profile: deploy-dev
+  iam:
+    role: arn:aws:iam::304649006169:role/custom_lambda
+  vpc:
+    securityGroupIds:
+      - sg-00836ae7ae13da1da
+    subnetIds:
+      - subnet-00ad334dc833f0710
+      - subnet-000074828e02bf344
+      - subnet-065ed420c79f67487
+      - subnet-0fac49d84fbe04c2a
+      - subnet-077b28faf95da87e0
+      - subnet-07882ad54ab16277e
+
+functions:
+  authentication:
+    handler: build/index.authentication
+    events:
+      - httpApi:
+          path: /auth
+          method: post
+  incrementVisits:
+    handler: build/index.incrementVisits
+    events:
+      - httpApi:
+          path: /visits/{namespace}
+          method: put
+  getVisits:
+    handler: build/index.getVisits
+    events:
+      - httpApi:
+          path: /visits/{namespace}
+          method: get
+  createUser:
+    handler: build/index.createUser
+    events:
+      - httpApi:
+          path: /users
+          method: post
+  showUser:
+    handler: build/index.showUser
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: get
+  confirmUser:
+    handler: build/index.confirmUser
+    events:
+      - httpApi:
+          path: /users/confirm/{email}
+          method: patch
+  sendConfirmationEmailWorker:
+    handler: build/index.sendConfirmationEmailWorker
+    description: Send confirmation email register
+
+resources:
+  Resources:
