@@ -22,6 +22,7 @@
     "typeorm": "npx typeorm-ts-node-esm",
     "jest": "jest",
     "test": "npx dotenv-run-script .env.local jest -- --collectCoverage",
+    "test:dev": "npx dotenv-run-script .env jest -- --collectCoverage",
     "test:watch": "npx dotenv-run-script .env.local jest -- --collectCoverage --watch",
     "test:watchAll": "npx dotenv-run-script .env.local jest -- --collectCoverage --watchAll",
     "watch": "tsc -w"
