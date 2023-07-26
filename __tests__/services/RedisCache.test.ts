@@ -11,6 +11,7 @@ const client = {
   get: jest.fn(),
   set: jest.fn(),
   incrBy: jest.fn(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 createClientMock.mockReturnValue(client);
 
